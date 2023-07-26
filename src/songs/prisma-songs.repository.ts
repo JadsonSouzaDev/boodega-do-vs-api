@@ -4,7 +4,7 @@ import { SongsRepository } from 'src/repositories/songs.repository';
 import { Prisma, Song } from '@prisma/client';
 
 @Injectable()
-export class PrismaSongRepository implements SongsRepository {
+export class PrismaSongsRepository implements SongsRepository {
   constructor(private prisma: PrismaService) {}
 
   create(song: Prisma.SongCreateInput): Promise<Song> {

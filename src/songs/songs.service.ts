@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
 import { Song } from './entities/song.entity';
@@ -20,11 +20,19 @@ export class SongsService {
   }
 
   findBySlug(slug: string): Promise<Song> {
-    return this.repository.findBySlug(slug);
+    try {
+      return this.repository.findBySlug(slug);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   findById(id: string): Promise<Song> {
-    return this.repository.findById(id);
+    try {
+      return this.repository.findById(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   async update(id: string, updateSongDto: UpdateSongDto) {
@@ -37,12 +45,12 @@ export class SongsService {
       tonality: updateSongDto.tonality,
       duration: updateSongDto.duration,
       youtubeCode: updateSongDto.youtubeCode,
-      active: true
+      active: true,
     };
     return this.repository.update(id, updatedSong);
   }
 
   remove(id: string) {
-    return this.repository.delete(id)
+    return this.repository.delete(id);
   }
 }
