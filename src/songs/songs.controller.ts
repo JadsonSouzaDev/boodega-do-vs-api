@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { SongsService } from './songs.service';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
@@ -12,23 +21,28 @@ export class SongsController {
     return this.songsService.create(createSongDto);
   }
 
-  @Get()
-  findAll() {
-    return this.songsService.findAll();
+  @Get('')
+  findAll(@Query() query: {name: string}) {
+    return this.songsService.findAll(query.name);
+  }
+
+  @Get(':slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.songsService.findBySlug(slug);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.songsService.findOne(+id);
+  findById(@Param('id') id: string) {
+    return this.songsService.findById(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSongDto: UpdateSongDto) {
-    return this.songsService.update(+id, updateSongDto);
+    return this.songsService.update(id, updateSongDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.songsService.remove(+id);
+    return this.songsService.remove(id);
   }
 }

@@ -1,26 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
+import { Song } from './entities/song.entity';
+import { SongsRepository } from 'src/repositories/songs.repository';
+import { createSlug } from 'src/utils/slugUtil';
 
 @Injectable()
 export class SongsService {
-  create(createSongDto: CreateSongDto) {
-    return 'This action adds a new song';
+  constructor(private repository: SongsRepository) {}
+
+  create(createSongDto: CreateSongDto): Promise<Song> {
+    const song: Song = new Song(createSongDto);
+    const slug = createSlug(song.name);
+    return this.repository.create({ ...song, slug });
   }
 
-  findAll() {
-    return `This action returns all songs`;
+  findAll(name: string): Promise<Song[]> {
+    return this.repository.findAll(name);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} song`;
+  findBySlug(slug: string): Promise<Song> {
+    return this.repository.findBySlug(slug);
   }
 
-  update(id: number, updateSongDto: UpdateSongDto) {
-    return `This action updates a #${id} song`;
+  findById(id: string): Promise<Song> {
+    return this.repository.findById(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} song`;
+  async update(id: string, updateSongDto: UpdateSongDto) {
+    const song = await this.findById(id);
+    const updatedSong: Song = {
+      id,
+      slug: song.slug,
+      name: updateSongDto.name,
+      style: updateSongDto.style,
+      tonality: updateSongDto.tonality,
+      duration: updateSongDto.duration,
+      youtubeCode: updateSongDto.youtubeCode,
+      active: true
+    };
+    return this.repository.update(id, updatedSong);
+  }
+
+  remove(id: string) {
+    return this.repository.delete(id)
   }
 }
