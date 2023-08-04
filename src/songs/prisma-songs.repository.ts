@@ -15,7 +15,7 @@ export class PrismaSongsRepository implements SongsRepository {
 
   findAll(name: string): Promise<Song[]> {
     return this.prisma.song.findMany({
-      where: { active: true, name: { contains: name } },
+      where: { active: true, name: { contains: name, mode: 'insensitive' } },
     });
   }
 

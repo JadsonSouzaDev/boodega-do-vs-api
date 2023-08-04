@@ -8,7 +8,7 @@ export class CreateSongDto {
   style: string;
 
   @IsNotEmpty()
-  @Length(1, 2)
+  @Length(1, 3)
   tonality: string;
 
   @IsInt()

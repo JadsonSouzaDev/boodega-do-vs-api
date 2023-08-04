@@ -16,7 +16,7 @@ model Song {
   slug        String   @unique
   name        String
   style       String
-  tonality    String   @db.VarChar(2)
+  tonality    String   @db.VarChar(3)
   duration    Int      @default(0)
   youtubeCode String
   active      Boolean
