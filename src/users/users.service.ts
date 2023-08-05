@@ -1,12 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from 'src/repositories/users.repository';
 import { User } from './entities/user.entity';
+import { genSaltSync, hashSync } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -48,6 +45,16 @@ export class UsersService {
       password: user.password,
     };
     return this.repository.update(id, updatedUser);
+  }
+
+  async updatePassword(email: string, password: string): Promise<User> {
+    const user = await this.findByEmail(email);
+    const encryptedPassword = hashSync(password, genSaltSync(10));
+    const updatedUser: User = {
+      ...user,
+      password: encryptedPassword,
+    };
+    return this.repository.update(updatedUser.id, updatedUser);
   }
 
   remove(id: string): Promise<User> {

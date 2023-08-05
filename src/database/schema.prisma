@@ -34,3 +34,19 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Recovery {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SongRequest {
+  id          String   @id @default(uuid())
+  link        String
+  details       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -5,9 +5,34 @@ import { PrismaService } from './database/prisma.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RecoveryModule } from './recovery/recovery.module';
+import { MailingModule } from './mailing/mailing.module';
+import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { SongRequestsModule } from './song-requests/song-requests.module';
 
 @Module({
-  imports: [SongsModule, AuthModule, UsersModule, RecoveryModule],
+  imports: [
+    SongsModule,
+    AuthModule,
+    UsersModule,
+    RecoveryModule,
+    MailingModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MailerModule.forRoot({
+      transport: 'smtps://user@domain.com:pass@smtp.domain.com',
+      template: {
+        dir: process.cwd() + '/templates/',
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
+    SongRequestsModule,
+  ],
   controllers: [AppController],
   providers: [PrismaService],
 })
