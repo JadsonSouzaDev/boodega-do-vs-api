@@ -1,26 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSongRequestDto } from './dto/create-song-request.dto';
 import { UpdateSongRequestDto } from './dto/update-song-request.dto';
+import { SongRequestsRepository } from 'src/repositories/songRequest.repository';
+import { SongRequest } from './entities/song-request.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class SongRequestsService {
-  create(createSongRequestDto: CreateSongRequestDto) {
-    return 'This action adds a new songRequest';
+  constructor(private repository: SongRequestsRepository) {}
+
+  create(createSongRequestDto: CreateSongRequestDto, user: User) {
+    const songRequest: SongRequest = new SongRequest(createSongRequestDto);
+    return this.repository.create({ ...songRequest, userId: user.id });
   }
 
   findAll() {
-    return `This action returns all songRequests`;
+    return this.repository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} songRequest`;
+  findOne(id: string) {
+    try {
+      return this.repository.findById(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
-  update(id: number, updateSongRequestDto: UpdateSongRequestDto) {
-    return `This action updates a #${id} songRequest`;
+  async update(id: string, { link, details }: UpdateSongRequestDto) {
+    const savedRequest = await this.findOne(id);
+    const updatedSongRequest = { ...savedRequest, link, details };
+    return this.repository.update(id, updatedSongRequest);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} songRequest`;
+  remove(id: string) {
+    return this.repository.delete(id);
   }
 }
