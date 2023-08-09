@@ -1,32 +1,49 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserRequestDto } from './dto/request/create-user-request.dto';
+import { UpdateUserRequestDto } from './dto/request/update-user-request.dto';
 import { UsersRepository } from 'src/repositories/users.repository';
 import { User } from './entities/user.entity';
 import { genSaltSync, hashSync } from 'bcrypt';
+import { UserResponseDto } from './dto/response/user-response';
 
 @Injectable()
 export class UsersService {
   constructor(private repository: UsersRepository) {}
 
-  create(createUserDto: CreateUserDto): Promise<User> {
-    const user: User = new User(createUserDto);
-    return this.repository.create(user);
+  async create(createUserDto: CreateUserRequestDto): Promise<UserResponseDto> {
+    const user = createUserDto.toEntity();
+    const userSaved = await this.repository.create(user);
+    return new UserResponseDto(userSaved);
   }
 
-  findAll(name: string, email: string, phone: string): Promise<User[]> {
-    return this.repository.findAll(name, email, phone);
+  async findAll(
+    name: string,
+    email: string,
+    phone: string,
+  ): Promise<UserResponseDto[]> {
+    const users = await this.repository.findAll(name, email, phone);
+    return users.map((user) => new UserResponseDto(user));
   }
 
-  findById(id: string): Promise<User> {
+  async findById(id: string): Promise<UserResponseDto> {
     try {
-      return this.repository.findById(id);
+      const user = await this.repository.findById(id);
+      return new UserResponseDto(user);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
-  findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<UserResponseDto> {
+    try {
+      const user = await this.repository.findByEmail(email);
+      return new UserResponseDto(user);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  async findByEmailAdmin(email: string): Promise<User> {
     try {
       return this.repository.findByEmail(email);
     } catch (error) {
@@ -34,27 +51,39 @@ export class UsersService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findById(id);
-    const updatedUser: User = {
-      id,
-      name: updateUserDto.name,
-      phone: updateUserDto.phone,
-      active: true,
-      email: user.email,
-      password: user.password,
-    };
-    return this.repository.update(id, updatedUser);
+  async update(
+    id: string,
+    updateUserDto: UpdateUserRequestDto,
+  ): Promise<UserResponseDto> {
+    try {
+      const oldUser = await this.repository.findById(id);
+      const mergedUser = updateUserDto.toEntity(oldUser);
+      const userSaved = await this.repository.update(id, mergedUser);
+      return new UserResponseDto(userSaved);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
-  async updatePassword(email: string, password: string): Promise<User> {
-    const user = await this.findByEmail(email);
-    const encryptedPassword = hashSync(password, genSaltSync(10));
-    const updatedUser: User = {
-      ...user,
-      password: encryptedPassword,
-    };
-    return this.repository.update(updatedUser.id, updatedUser);
+  async updatePassword(
+    email: string,
+    password: string,
+  ): Promise<UserResponseDto> {
+    try {
+      const oldUser = await this.repository.findByEmail(email);
+      const encryptedPassword = hashSync(password, genSaltSync(10));
+      const updatedUser = {
+        ...oldUser,
+        password: encryptedPassword,
+      };
+      const userSaved = await this.repository.update(
+        updatedUser.id,
+        updatedUser,
+      );
+      return new UserResponseDto(userSaved);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 
   remove(id: string): Promise<User> {

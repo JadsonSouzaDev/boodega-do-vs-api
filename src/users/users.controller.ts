@@ -11,12 +11,12 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserRequestDto } from './dto/request/create-user-request.dto';
+import { UpdateUserRequestDto } from './dto/request/update-user-request.dto';
 import { Public } from 'src/decorators/public.decorator';
+import { UserResponseDto } from './dto/response/user-response';
 
 @Controller('users')
 export class UsersController {
@@ -24,7 +24,9 @@ export class UsersController {
 
   @Public()
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
+  create(
+    @Body() createUserDto: CreateUserRequestDto,
+  ): Promise<UserResponseDto> {
     try {
       return this.usersService.create(createUserDto);
     } catch (error) {
@@ -33,25 +35,31 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@Query() query: { name: string; email: string; phone: string }) {
+  findAll(
+    @Query() query: { name: string; email: string; phone: string },
+  ): Promise<UserResponseDto[]> {
     return this.usersService.findAll(query.name, query.email, query.phone);
   }
 
   @Get(':id')
-  findById(@Param('id', new ParseUUIDPipe()) id: string) {
+  findById(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<UserResponseDto> {
     return this.usersService.findById(id);
   }
 
   @Get(':id')
-  findByEmail(@Param('id', new ParseUUIDPipe()) id: string) {
+  findByEmail(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<UserResponseDto> {
     return this.usersService.findByEmail(id);
   }
 
   @Patch(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+    @Body() updateUserDto: UpdateUserRequestDto,
+  ): Promise<UserResponseDto> {
     return this.usersService.update(id, updateUserDto);
   }
 

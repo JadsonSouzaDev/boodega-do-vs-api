@@ -16,7 +16,7 @@ export class RecoveryService {
   ) {}
 
   async requestRecovery(createRecoveryDto: RequestRecoveryDto) {
-    const user = await this.usersService.findByEmail(createRecoveryDto.email);
+    const user = await this.usersService.findByEmailAdmin(createRecoveryDto.email);
     let oldRecovery: Recovery;
 
     try {

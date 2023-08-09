@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { UsersRepository } from 'src/repositories/users.repository';
-import { Prisma, User } from '@prisma/client';
+import { User, Role } from './entities/user.entity';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
   constructor(private prisma: PrismaService) {}
 
-  create(user: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data: user,
-    });
+  async create(user: User): Promise<User> {
+    return await this.prisma.user.create({ data: user });
   }
 
   findAll(name: string, email: string, phone: string): Promise<User[]> {
@@ -20,6 +18,7 @@ export class PrismaUsersRepository implements UsersRepository {
         name: { contains: name },
         email: { contains: email },
         phone: { contains: phone },
+        role: Role.USER,
       },
     });
   }
@@ -36,18 +35,15 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  update(id: string, user: Prisma.UserUpdateInput): Promise<User> {
+  update(id: string, user: User): Promise<User> {
     return this.prisma.user.update({
       data: user,
       where: { id },
     });
   }
 
-  delete(id: string): Promise<User> {
-    const user = this.findById(id);
-    return this.prisma.user.update({
-      data: { ...user, active: false },
-      where: { id },
-    });
+  async delete(id: string): Promise<User> {
+    const user = await this.findById(id);
+    return this.update(id, { ...user, active: false });
   }
 }
