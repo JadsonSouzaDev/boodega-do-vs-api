@@ -53,3 +53,16 @@ model SongRequest {
   User      User?    @relation(fields: [userId], references: [id])
   userId    String?
 }
+
+model SongVersion {
+  id    String          @id @default(uuid())
+  key   SongVersionEnum @unique
+  label String          @unique
+  price Decimal         @db.Money
+}
+
+enum SongVersionEnum {
+  playback
+  lr
+  multitrack
+}

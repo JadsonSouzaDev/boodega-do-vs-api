@@ -10,6 +10,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { SongRequestsModule } from './song-requests/song-requests.module';
+import { OrdersModule } from './orders/orders.module';
+import { SongVersionsModule } from './song-versions/song-versions.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { SongRequestsModule } from './song-requests/song-requests.module';
       },
     }),
     SongRequestsModule,
+    OrdersModule,
+    SongVersionsModule,
   ],
   controllers: [AppController],
   providers: [PrismaService],
