@@ -41,6 +41,10 @@ export class SongsController {
   findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.songsService.findById(id);
   }
+  @Get(':id/download')
+  findByIdWithUrls(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.songsService.findByIdWithUrls(id);
+  }
 
   @Patch(':id')
   update(

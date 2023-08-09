@@ -12,16 +12,17 @@ datasource db {
 }
 
 model Song {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  name        String
-  style       String
-  tonality    String   @db.VarChar(3)
-  duration    Int      @default(0)
-  youtubeCode String
-  active      Boolean
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String            @id @default(uuid())
+  slug         String            @unique
+  name         String
+  style        String
+  tonality     String            @db.VarChar(3)
+  duration     Int               @default(0)
+  youtubeCode  String
+  active       Boolean
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  urlsDownload URLDownloadSong[]
 }
 
 model User {
@@ -55,14 +56,24 @@ model SongRequest {
 }
 
 model SongVersion {
-  id    String          @id @default(uuid())
-  key   SongVersionEnum @unique
-  label String          @unique
-  price Decimal         @db.Money
+  id              String            @id @default(uuid())
+  key             SongVersionEnum   @unique
+  label           String            @unique
+  price           Decimal           @db.Money
+  URLDownloadSong URLDownloadSong[]
 }
 
 enum SongVersionEnum {
   playback
   lr
   multitrack
+}
+
+model URLDownloadSong {
+  id            String       @id @default(uuid())
+  url           String       @unique
+  version       SongVersion? @relation(fields: [songVersionId], references: [id])
+  songVersionId String?
+  song          Song?        @relation(fields: [songId], references: [id])
+  songId        String?
 }

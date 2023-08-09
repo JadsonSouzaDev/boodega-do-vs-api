@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
-import { Song } from './entities/song.entity';
+import { Song, SongWithUrls } from './entities/song.entity';
 import { SongsRepository } from 'src/repositories/songs.repository';
 import { createSlug } from 'src/utils/slugUtil';
 
@@ -30,6 +30,14 @@ export class SongsService {
   findById(id: string): Promise<Song> {
     try {
       return this.repository.findById(id);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  findByIdWithUrls(id: string): Promise<SongWithUrls> {
+    try {
+      return this.repository.findByIdWithUrls(id);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
