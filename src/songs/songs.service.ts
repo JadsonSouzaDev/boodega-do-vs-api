@@ -1,64 +1,72 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSongDto } from './dto/create-song.dto';
-import { UpdateSongDto } from './dto/update-song.dto';
-import { Song, SongWithUrls } from './entities/song.entity';
+import { CreateSongRequestDto } from './dto/request/create-song-request.dto';
+import { UpdateRequestSongDto } from './dto/request/update-song-request.dto';
+import { Song } from './entities/song.entity';
 import { SongsRepository } from 'src/repositories/songs.repository';
 import { createSlug } from 'src/utils/slugUtil';
+import { SongResponseDto } from './dto/response/song-response.dto';
 
 @Injectable()
 export class SongsService {
   constructor(private repository: SongsRepository) {}
 
-  create(createSongDto: CreateSongDto): Promise<Song> {
-    const song: Song = new Song(createSongDto);
-    const slug = createSlug(song.name);
-    return this.repository.create({ ...song, slug });
+  async create(createSongDto: CreateSongRequestDto): Promise<SongResponseDto> {
+    const slug = createSlug(createSongDto.name);
+    const song = createSongDto.toEntity(slug);
+    const songSaved = await this.repository.create({ ...song, slug });
+    return new SongResponseDto(songSaved);
   }
 
-  findAll(name: string): Promise<Song[]> {
+  async findAll(name: string): Promise<SongResponseDto[]> {
+    const songs = await this.repository.findAll(name);
+    return songs.map((song) => new SongResponseDto(song));
+  }
+
+  mySongs(name: string): Promise<Song[]> {
     return this.repository.findAll(name);
   }
 
-  findBySlug(slug: string): Promise<Song> {
+  async findBySlug(slug: string): Promise<SongResponseDto> {
     try {
-      return this.repository.findBySlug(slug);
+      const song = await this.repository.findBySlug(slug);
+      return new SongResponseDto(song);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
-  findById(id: string): Promise<Song> {
+  async findById(id: string): Promise<SongResponseDto> {
     try {
-      return this.repository.findById(id);
+      const song = await this.repository.findById(id);
+      return new SongResponseDto(song);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
-  findByIdWithUrls(id: string): Promise<SongWithUrls> {
+  async update(
+    id: string,
+    updateSongDto: UpdateRequestSongDto,
+  ): Promise<SongResponseDto> {
     try {
-      return this.repository.findByIdWithUrls(id);
+      const oldSong = await this.repository.findById(id);
+      const updatedSong = updateSongDto.toEntity(oldSong);
+      const songSaved = await this.repository.update(id, updatedSong);
+      return new SongResponseDto(songSaved);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
   }
 
-  async update(id: string, updateSongDto: UpdateSongDto) {
-    const song = await this.findById(id);
-    const updatedSong: Song = {
-      id,
-      slug: song.slug,
-      name: updateSongDto.name,
-      style: updateSongDto.style,
-      tonality: updateSongDto.tonality,
-      duration: updateSongDto.duration,
-      youtubeCode: updateSongDto.youtubeCode,
-      active: true,
-    };
-    return this.repository.update(id, updatedSong);
+  async remove(id: string): Promise<SongResponseDto> {
+    const song = await this.repository.delete(id);
+    return new SongResponseDto(song);
   }
 
-  remove(id: string) {
-    return this.repository.delete(id);
+  getLinkDownload(id: string) {
+    // id da relacao entre usuario, versao e musica
+    // buscar musica pelo id
+    // retornar url
+    return id;
   }
 }

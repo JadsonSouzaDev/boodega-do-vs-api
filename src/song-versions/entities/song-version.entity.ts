@@ -1,6 +1,15 @@
-import { Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from '@prisma/client/runtime/library';
 
-export type SongVersionEnum = 'playback' | 'lr' | 'multitrack';
+export const SongVersionEnum: {
+  [x: string]: 'playback' | 'lr' | 'multitrack';
+} = {
+  playback: 'playback',
+  lr: 'lr',
+  multitrack: 'multitrack',
+};
+
+export type SongVersionEnum =
+  (typeof SongVersionEnum)[keyof typeof SongVersionEnum];
 
 export class SongVersion {
   id: string;

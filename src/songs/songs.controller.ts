@@ -10,18 +10,20 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  Res,
 } from '@nestjs/common';
 import { SongsService } from './songs.service';
-import { CreateSongDto } from './dto/create-song.dto';
-import { UpdateSongDto } from './dto/update-song.dto';
+import { CreateSongRequestDto } from './dto/request/create-song-request.dto';
+import { UpdateRequestSongDto } from './dto/request/update-song-request.dto';
 import { Public } from 'src/decorators/public.decorator';
+import axios from 'axios';
 
 @Controller('songs')
 export class SongsController {
   constructor(private readonly songsService: SongsService) {}
 
   @Post()
-  create(@Body() createSongDto: CreateSongDto) {
+  create(@Body() createSongDto: CreateSongRequestDto) {
     return this.songsService.create(createSongDto);
   }
 
@@ -29,6 +31,11 @@ export class SongsController {
   @Get('')
   findAll(@Query() query: { name: string }) {
     return this.songsService.findAll(query.name);
+  }
+
+  @Get('my-songs')
+  mySongs(@Query() query: { name: string }) {
+    return this.songsService.mySongs(query.name);
   }
 
   @Public()
@@ -41,15 +48,24 @@ export class SongsController {
   findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.songsService.findById(id);
   }
+
   @Get(':id/download')
-  findByIdWithUrls(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.songsService.findByIdWithUrls(id);
+  async downloadSong(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Res() res: Response,
+  ) {
+    const downloadURL = await this.songsService.getLinkDownload(id);
+    const instance = axios.create({ baseURL: downloadURL });
+    let response = await instance.get('', {
+      responseType: 'stream',
+    });
+    response.data.pipe(res);
   }
 
   @Patch(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateSongDto: UpdateSongDto,
+    @Body() updateSongDto: UpdateRequestSongDto,
   ) {
     return this.songsService.update(id, updateSongDto);
   }

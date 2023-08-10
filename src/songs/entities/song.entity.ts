@@ -1,14 +1,14 @@
 import { SongVersion } from 'src/song-versions/entities/song-version.entity';
-import { CreateSongDto } from '../dto/create-song.dto';
+import { CreateSongRequestDto } from '../dto/request/create-song-request.dto';
 
 export class URLDownloadSong {
-  id: string
+  id: string;
   url: string;
-  version: SongVersion
+  version: SongVersion;
 }
 
 export class Song {
-  constructor(iSong: CreateSongDto) {
+  constructor(iSong: CreateSongRequestDto) {
     this.name = iSong.name;
     this.style = iSong.style;
     this.tonality = iSong.tonality;
@@ -24,9 +24,8 @@ export class Song {
   tonality: string;
   duration: number;
   youtubeCode: string;
-  active: boolean;
-}
-
-export type SongWithUrls = {
   urlsDownload: URLDownloadSong[];
-} & Song
+  active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

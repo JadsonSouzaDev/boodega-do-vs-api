@@ -1,60 +1,66 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { SongsRepository } from 'src/repositories/songs.repository';
-import { Prisma, Song } from '@prisma/client';
-import { SongWithUrls } from './entities/song.entity';
+import { Song } from './entities/song.entity';
 
 @Injectable()
 export class PrismaSongsRepository implements SongsRepository {
   constructor(private prisma: PrismaService) {}
 
-  create(song: Prisma.SongCreateInput): Promise<Song> {
-    return this.prisma.song.create({
-      data: song,
+  async create(song: Song): Promise<Song> {
+    const songSaved = await this.prisma.song.create({
+      data: {
+        ...song,
+        urlsDownload: { createMany: { data: song.urlsDownload } },
+      },
+      include: {
+        urlsDownload: { include: { version: true } },
+      },
     });
+    console.log(songSaved);
+    return songSaved;
   }
 
   findAll(name: string): Promise<Song[]> {
     return this.prisma.song.findMany({
       where: { active: true, name: { contains: name, mode: 'insensitive' } },
+      include: {
+        urlsDownload: { include: { version: true } },
+      },
     });
   }
 
   findBySlug(slug: string): Promise<Song> {
     return this.prisma.song.findFirstOrThrow({
       where: { slug, active: true },
+      include: {
+        urlsDownload: { include: { version: true } },
+      },
     });
   }
 
   findById(id: string): Promise<Song> {
     return this.prisma.song.findFirstOrThrow({
       where: { id },
-    });
-  }
-
-  async findByIdWithUrls(id: string): Promise<SongWithUrls> {
-    return this.prisma.song.findFirstOrThrow({
-      where: { id },
-      select: {
-        id: true,
-        active: true,
-        name: true,
-        createdAt: true,
-        duration: true,
-        slug: true,
-        style: true,
-        tonality: true,
-        updatedAt: true,
-        youtubeCode: true,
-        urlsDownload: { select: { id: true, url: true, version: true } },
+      include: {
+        urlsDownload: { include: { version: true } },
       },
     });
   }
 
-  update(id: string, song: Prisma.SongUpdateInput): Promise<Song> {
+  update(id: string, song: Song): Promise<Song> {
     return this.prisma.song.update({
-      data: song,
+      data: {
+        ...song,
+        urlsDownload: {
+          deleteMany: { id: { in: song.urlsDownload.map(({ id }) => id) } },
+          createMany: { data: song.urlsDownload },
+        },
+      },
       where: { id },
+      include: {
+        urlsDownload: { include: { version: true } },
+      },
     });
   }
 
@@ -63,16 +69,9 @@ export class PrismaSongsRepository implements SongsRepository {
     return this.prisma.song.update({
       data: { ...song, active: false },
       where: { id },
+      include: {
+        urlsDownload: { include: { version: true } },
+      },
     });
-  }
-
-  // Exclude keys from user
-  exclude<Song, Key extends keyof Song>(
-    song: Song,
-    keys: string[],
-  ): Omit<Song, Key> {
-    return Object.fromEntries(
-      Object.entries(song).filter(([key]) => !keys.includes(key)),
-    ) as Song;
   }
 }
