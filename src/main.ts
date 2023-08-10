@@ -9,7 +9,7 @@ async function bootstrap() {
 
   // Auth
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );
   const reflector = app.get(Reflector);
   app.useGlobalGuards(new AuthGuard(reflector));

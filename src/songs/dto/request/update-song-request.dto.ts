@@ -1,7 +1,7 @@
-import { IsInt, IsNotEmpty, Length, Min } from "class-validator";
-import { URLDownloadSongDto } from "./create-song-request.dto";
-import { Transform } from "class-transformer";
-import { Song } from "src/songs/entities/song.entity";
+import { ArrayNotEmpty, IsInt, IsNotEmpty, Length, Min } from 'class-validator';
+import { URLDownloadSongDto } from './create-song-request.dto';
+import { Transform } from 'class-transformer';
+import { Song } from 'src/songs/entities/song.entity';
 
 export class UpdateRequestSongDto {
   @IsNotEmpty()
@@ -22,6 +22,7 @@ export class UpdateRequestSongDto {
   @Length(1, 50)
   youtubeCode: string;
 
+  @ArrayNotEmpty()
   urlsDownload: URLDownloadSongDto[];
 
   @Transform(() => Song)
@@ -39,14 +40,10 @@ export class UpdateRequestSongDto {
       updatedAt: songSaved.updatedAt,
       urlsDownload: this.urlsDownload.map((urlDownload) => {
         return {
-          id: null,
+          id: urlDownload.id,
           url: urlDownload.url,
-          version: {
-            id: urlDownload.version.id,
-            label: null,
-            key: null,
-            price: null,
-          },
+          songVersionId: urlDownload.version.id,
+          version: undefined,
         };
       }),
     };

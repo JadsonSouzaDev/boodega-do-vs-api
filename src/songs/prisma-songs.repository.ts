@@ -53,8 +53,13 @@ export class PrismaSongsRepository implements SongsRepository {
       data: {
         ...song,
         urlsDownload: {
-          deleteMany: { id: { in: song.urlsDownload.map(({ id }) => id) } },
-          createMany: { data: song.urlsDownload },
+          deleteMany: {
+            id: { in: song.urlsDownload.map(({ id }) => id ?? '') },
+          },
+          createMany: {
+            data: song.urlsDownload,
+            skipDuplicates: true,
+          },
         },
       },
       where: { id },

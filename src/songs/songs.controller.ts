@@ -17,11 +17,13 @@ import { CreateSongRequestDto } from './dto/request/create-song-request.dto';
 import { UpdateRequestSongDto } from './dto/request/update-song-request.dto';
 import { Public } from 'src/decorators/public.decorator';
 import axios from 'axios';
+import { Admin } from 'src/decorators/admin.decorator';
 
 @Controller('songs')
 export class SongsController {
   constructor(private readonly songsService: SongsService) {}
-
+  
+  @Admin()
   @Post()
   create(@Body() createSongDto: CreateSongRequestDto) {
     return this.songsService.create(createSongDto);
@@ -39,11 +41,12 @@ export class SongsController {
   }
 
   @Public()
-  @Get(':slug')
+  @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.songsService.findBySlug(slug);
   }
 
+  @Admin()
   @Get(':id')
   findById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.songsService.findById(id);
@@ -62,6 +65,7 @@ export class SongsController {
     response.data.pipe(res);
   }
 
+  @Admin()
   @Patch(':id')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,

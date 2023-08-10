@@ -4,6 +4,7 @@ import { CreateSongRequestDto } from '../dto/request/create-song-request.dto';
 export class URLDownloadSong {
   id: string;
   url: string;
+  songVersionId: string;
   version: SongVersion;
 }
 

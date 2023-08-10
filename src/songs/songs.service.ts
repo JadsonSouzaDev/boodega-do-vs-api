@@ -35,10 +35,9 @@ export class SongsService {
     }
   }
 
-  async findById(id: string): Promise<SongResponseDto> {
+  async findById(id: string): Promise<Song> {
     try {
-      const song = await this.repository.findById(id);
-      return new SongResponseDto(song);
+      return this.repository.findById(id);
     } catch (error) {
       throw new NotFoundException(error.message);
     }
