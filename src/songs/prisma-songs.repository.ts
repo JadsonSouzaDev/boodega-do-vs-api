@@ -7,44 +7,39 @@ import { Song } from './entities/song.entity';
 export class PrismaSongsRepository implements SongsRepository {
   constructor(private prisma: PrismaService) {}
 
+  include = {
+    urlsDownload: { include: { version: true } },
+  };
+
   async create(song: Song): Promise<Song> {
     const songSaved = await this.prisma.song.create({
       data: {
         ...song,
         urlsDownload: { createMany: { data: song.urlsDownload } },
       },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
-    console.log(songSaved);
     return songSaved;
   }
 
   findAll(name: string): Promise<Song[]> {
     return this.prisma.song.findMany({
       where: { active: true, name: { contains: name, mode: 'insensitive' } },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
   }
 
   findBySlug(slug: string): Promise<Song> {
     return this.prisma.song.findFirstOrThrow({
       where: { slug, active: true },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
   }
 
   findById(id: string): Promise<Song> {
     return this.prisma.song.findFirstOrThrow({
       where: { id },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
   }
 
@@ -63,9 +58,7 @@ export class PrismaSongsRepository implements SongsRepository {
         },
       },
       where: { id },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
   }
 
@@ -74,9 +67,7 @@ export class PrismaSongsRepository implements SongsRepository {
     return this.prisma.song.update({
       data: { ...song, active: false },
       where: { id },
-      include: {
-        urlsDownload: { include: { version: true } },
-      },
+      include: this.include,
     });
   }
 }

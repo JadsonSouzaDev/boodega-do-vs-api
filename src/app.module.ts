@@ -12,6 +12,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { SongRequestsModule } from './song-requests/song-requests.module';
 import { OrdersModule } from './orders/orders.module';
 import { SongVersionsModule } from './song-versions/song-versions.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SongVersionsModule } from './song-versions/song-versions.module';
     SongRequestsModule,
     OrdersModule,
     SongVersionsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [PrismaService],

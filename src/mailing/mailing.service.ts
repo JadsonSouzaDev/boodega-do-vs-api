@@ -13,7 +13,6 @@ export class MailingService {
   ) {}
 
   private async setTransport() {
-    console.log(this.configService.get('GOOGLE_CLIENT_ID'));
     const OAuth2 = google.auth.OAuth2;
     const oauth2Client = new OAuth2(
       this.configService.get('GOOGLE_CLIENT_ID'),
